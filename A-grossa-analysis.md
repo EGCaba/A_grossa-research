@@ -115,3 +115,405 @@ optimization
 ## 8 8                          9869            -131
 ## 9 9                          9760            -109
 ```
+
+To choose the best *denovo*  parameter, we will have to calculate the difference of loci identified for each parameter combination. For instance, to calculate the difference of loci identified for `-M=2`, we have to substract to `-M=2`  the loci identified in `-M=1`. The positive number closest to zero is considered the best parameter fit.
+
+
+```
+## Warning: NAs introducidos por coerción
+```
+
+```
+## [1] "numeric"
+```
+
+```
+## Warning: Use of `optimization$M` is discouraged. Use `M` instead.
+```
+
+```
+## Warning: Use of `optimization$M` is discouraged. Use `M` instead.
+```
+
+```
+## Warning: Removed 1 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 1 row(s) containing missing values (geom_path).
+```
+
+![](A-grossa-analysis_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+`M1` is not in the plot because it is unlikely possible that all loci are independent,  and the plots starts from `M2`.
+
+### Executing `denovo_map.pl`
+
+After setting the best fit we can run properly `denovo_map.pl` following the next protocol:
+
+    # /bin/sh                                                                                                         
+    # ----------------Parameters---------------------- #          
+    #$  -S /bin/sh                                                                             
+    #$ -pe mthread 30           
+    #$ -q mThM.q                                                                                                      
+    #$ -l mres=240G,h_data=8G,h_vmem=8G,himem       
+    #$ -cwd                                                                                                           
+    #$ -j y                                                                                                           
+    #$ -N m3p                       
+    #$ -o m3p.log                                                                                                     
+    #$ -m bea                 
+    #$ -M caballeroeg@si.edu
+    #                                                                                                                 
+    # ----------------Modules------------------------- #                                                              
+    module load ~/modulefiles/miniconda                                                                               
+    source activate ste
+    #                                                                                                           
+    # ----------------Your Commands------------------- #     
+    #                                                                                                                          
+    echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                     
+    echo + NSLOTS = $NSLOTS 
+
+    denovo_map.pl -m 3 -M 3 -N 3 
+    --samples /scratch/genomics/caballeroeg/CPrads/clean_rads/   #Directorio donde están los archivos stacks
+    --popmap /scratch/genomics/caballer oeg/CPrads/clean_rads/popmp_1.txt  ##population map indicando el individuo y la población
+    -o /scratch/genomics/caballeroeg/CPrads/clean_rads/edgar_analysis/m3p/  #Directorio para guardar 
+    --paired  #Para nuestras lecturas de pares
+
+    #                                                                                                                          
+    echo = `date` job $JOB_NAME done  
+
+In this case, our popmap file follows the next format :
+
+    1s01F<tab>1
+    1s01M<tab>1
+    1s02<tab>1
+    ...
+    
+    Speciyfing the population of individuals 
+
+We can check the number of loci identified using the next command:
+
+    cat gstacks.log | grep -B 2 -A 3 '^Genotyped'
+
+wchich prints the number of loci generated:
+
+    Genotyped 93683 loci:
+      effective per-sample coverage: mean=49.4x, stdev=28.4x, min=4.5x, max=188.2x                                             
+      mean number of sites per locus: 465.0                                                                                    
+       a consistent phasing was found for 756770 of out 999308 (75.7%) diploid loci needing phasing    
+
+We can also check for individuals with low mean coverage (<10x) and discard them for our further analysis:
+
+     stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample \
+     | grep -v '^#' \
+     | cut -f 1-2,4-5,8
+
+    # For mean_cov_ns, the coverage at each locus is weighted by the number of                                                 
+    # samples present at that locus (i.e. coverage at shared loci counts more).                                                
+    sample  n_loci  n_used_fw_reads mean_cov        mean_cov_ns                                                                
+    1s01F   15217   600125  39.438  42.716                                                                                     
+    1s01M   28001   3383027 120.818 167.263                                                                                    
+    1s02    15521   568731  36.643  40.246                                                                                     
+    1s03    17532   734543  41.897  48.854                                                                                     
+    1s04    16607   1120518 67.473  75.308                                                                                     
+    1s05    17848   796382  44.620  52.041                                                                                     
+    1s06    17807   938246  52.690  60.962    
+
+In the shell we can pass that information into a `.txt` file with the next command:
+
+    stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample | grep -v '^#' | cut -f 1-2,4-5,8 > raw_cov.txt
+
+
+
+Then, we can edit the `raw_cov.txt`using different text editors as [Visual Studio Code](https://code.visualstudio.com), [Notepad++](https://notepad-plus-plus.org/downloads/) o or others depending on your prefferences or your OS.I  would not recommend use a note pad or microsoft word as editors. 
+
+En el editor de texto, abrimos el archivo :
+
+```
+sample|depth of|max  |reads  | %reads
+      |cov     |cov  |incorpo| incor
+------|--------|-----|-------|-----
+3Bx42 | 19.37  |278  |375366 |  77.0
+3S36  | 14.43  |256  |265521 |  73.3
+3S38H | 5.58   |118  |15367  |  38.5
+3S39M | 6.32   |181  |77588  |  68.1
+```
+We are interested in the second column. Those individuals with a depth of coverage below 10 (as 3s38H) will be discarded for upcoming analysis. 
+
+
+### Populations software
+
+ [`populations`](https://catchenlab.life.illinois.edu/stacks/comp/populations.php) command analyse individuals and calculates genomics statistics as FST, FIS, and export the results in formats as [STRUCTURE](https://web.stanford.edu/group/pritchardlab/structure.html), [plink](https://www.cog-genomics.org/plink/1.9/formats), [genepop](https://www.cog-genomics.org/plink/1.9/formats) to mention some.
+
+    # /bin/sh                                                                                                                  
+    # ----------------Parameters---------------------- #                                                                       
+    #$  -S /bin/sh                                                                                                             
+    #$ -pe mthread 30                                                                                                          
+    #$ -q mThM.q                                                                                                               
+    #$ -l mres=240G,h_data=8G,h_vmem=8G,himem                                                                                  
+    #$ -cwd                                                                                                                    
+    #$ -j y                                                                                                                    
+    #$ -N paired_populations                                                                                                   
+    #$ -o paired_populations.log                                                                                               
+    #$ -m bea                                                                                                                  
+    #$ -M caballeroeg@si.edu                                                                                                   
+    #                                                                                                                          
+    # ----------------Modules------------------------- #                                                                       
+    module load ~/modulefiles/miniconda                                                                                        
+    source activate ste                                                                                                        
+    #                                                                                                                          
+    # ----------------Your Commands------------------- #                                                                       
+    #                                                                                                                          
+    echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+    echo + NSLOTS = $NSLOTS                                                                                                    
+    #                                                                                                                          
+    populations -P /scratch/genomics/caballeroeg/CPrads/clean_rads/edgar_analysis/m3p 
+    -M /scratch/genomics/caballeroeg/populations_ana/paired_populations/paired_popmap.txt 
+    -O /scratch/genomics/caballeroeg/populations_ana/paired_populations 
+    -p 3 
+    -r 0.50 
+    --fstats 
+    --vcf 
+    --genepop 
+    --structure 
+    --treemix 
+    --hwe
+    #                                                                                                                          
+    echo = `date` job $JOB_NAME done
+
+The jobfile is the way we ran the software, the parameter `-p`  controls the minimun number of populations that a locus must be present to process and  `-r` the indicates the minimum percentage of individuals that must contain a locus to process it.
+
+To see the results we run the following command:
+
+    Removed 78826 loci that did not pass sample/population constraints from 93683 loci.
+    Kept 14857 loci, composed of 10149843 sites; 86404 of those sites were filtered, 412383 variant sites remained.            
+    Number of loci with PE contig: 14857.00 (100.0%);                                                                          
+      Mean length of loci: 673.17bp (stderr 0.60);                                                                             
+    Number of loci with SE/PE overlap: 14856.00 (100.0%);
+
+In our case we have 14857.
+
+## Faststructure
+
+[Faststructure](https://rajanil.github.io/fastStructure/) is an open source model based algorithm to study populations genetics. It is based on the [Hardy-Weinberg equlibrium](http://bioinformatica.uab.es/base/base3.asp?sitio=geneticapoblaciones&anar=concep&item=Hardy-Weinberg).
+
+
+
+### Executing the populations for  FastStructure usage
+
+Primero, we have to execute the populatons command
+
+```
+# /bin/sh                                                                                                        
+# ----------------Parameters---------------------- #                                                              
+#$  -S /bin/sh                                                                                                    
+#$ -pe mthread 30                                                                                                 
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem                                                                         
+#$ -cwd                                                                                                       
+#$ -j y                                                                                                        
+#$ -N random_snps_population                                                                                   
+#$ -o random_snps_population.log                                                                                  
+#$ -m bea                                                                                                         
+#$ -M caballeroeg@si.edu                                                                                        
+#                                                                                                                 
+# ----------------Modules------------------------- #                                                            
+module load ~/modulefiles/miniconda                                                                               
+source activate ste                                                                                               
+#                                                                                                                 
+# ----------------Your Commands------------------- #                                                            
+#                                                                                                              
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                   
+echo + NSLOTS = $NSLOTS                                                                                           
+#                                                                                                                 
+populations -P /scratch/genomics/caballeroeg/CPrads/clean_rads/edgar_analysis/m3p 
+-M /scratch/genomics/caballeroeg/populations_ana/paired_populations/paired_popmap.txt 
+-O /scratch/genomics/caballeroeg/populations_ana/random_snps_population 
+-p 3 -
+r 0.50 
+--fstats 
+--vcf 
+--genepop 
+--structure 
+--treemix 
+--hwe 
+--write-random-snp
+#                                                                                                                          
+echo = `date` job $JOB_NAME done   
+
+```
+As we see, the jobfile is exactly as the previous one but we habilitated the ouputs formars vcf,genepop,structure,treemix. Plus, the fstats calculates f-statistics, and the loci at Hardy-Wearding equlibrium. Furthermore, for this analysis we used the `write-random-snp`. For our abalysis, we are using the `structure`
+
+Prior executing FastStructure we have to edit the file with [R](https://www.r-project.org), or [Microsft Excel](https://www.microsoft.com/es-es/microsoft-365/excel).
+
+
+```r
+raw_pop <- read.delim('Estructure_data.txt')
+raw_pop[1:8,1:8]
+```
+
+```
+##       X X.1 X1_115 X2_199 X4_491 X6_135 X9_107 X15_302
+## 1 1s01F   1      2      2     -9      3      2       3
+## 2 1s01F   1      3      2     -9      3      2       3
+## 3 1s01M   1      3      2     -9      3      2      -9
+## 4 1s01M   1      3      2     -9      3      2      -9
+## 5  1s02   1      3      2      4      3      2      -9
+## 6  1s02   1      3      2      4      3      2      -9
+## 7  1s03   1      3      2     -9      3      2       3
+## 8  1s03   1      3      2     -9      3      2       3
+```
+
+The structure of the populations file is the following:
+
+
+* Column 1: Sample ID.
+
+* Column 2: Population.
+
+* Column 3-n: "SNPs" data.
+ 
+ We have to modify this dataset, given that columns 1-6 in fastStructure is metada and not 'SNPS' data. We can add four columns of '#' and substitue 0 with -9. Lastly, our final format is **str**.
+
+
+
+Our final file is:
+
+
+```r
+modi <- read.delim('structure_modified.txt')
+modi[1:8,1:12]
+```
+
+```
+##   X. X..1 X..2 X..3 X1s01F X1 X2 X2.1 X.9 X3 X2.2 X3.1
+## 1  #    #    #    #  1s01F  1  3    2  -9  3    2    3
+## 2  #    #    #    #  1s01M  1  3    2  -9  3    2   -9
+## 3  #    #    #    #  1s01M  1  3    2  -9  3    2   -9
+## 4  #    #    #    #   1s02  1  3    2   4  3    2   -9
+## 5  #    #    #    #   1s02  1  3    2   4  3    2   -9
+## 6  #    #    #    #   1s03  1  3    2  -9  3    2    3
+## 7  #    #    #    #   1s03  1  3    2  -9  3    2    3
+## 8  #    #    #    #   1s04  1  2    2   4  3    2   -9
+```
+
+### Executing fastStructure
+
+This is our `jobfile` :
+
+```
+Uage: python structure.py
+     -K <int>    number of populations assumed
+     --input=<file>   (/path/to/'file.str/format/file) #without quotes
+     --output=<file>   (/path/to/output/file)
+     --tol=<float>   (divergence criterion; 10e-6 by default)
+     --prior={simple,logistic}   (by default: simple)
+     --cv=<int>   (number of cross validation, 0 implies no validation cross; by default: 0)
+     --format={bed,str} (input file format; bed, by default.'str' for our purpose)
+     --full   (deploy all the parameters variables; optional)
+     --seed=<int>   (specify manually random seed number, optional)
+
+```
+
+Took from [vdreis](https://vdreis.com/faststructure/), which describes how to transform the data for faststucture, and  [fastructure official website](https://rajanil.github.io/fastStructure/). 
+
+The `jobfile` is :
+
+
+```
+# /bin/sh                                                                                                         
+# ----------------Parameters---------------------- #
+#$ -S /bin/sh                                                                                                   
+#$ -pe mthread 30                                                                                                 
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem                   
+#$ -cwd                                                                                                         
+#$ -j y                                                                                                           
+#$ -N k1                                                                                                          
+#$ -o K_$TASK_ID.log                                                                                              
+#$ -t 1-10                                                                                                        
+#$ -m bea                                                                                                
+#$ -M caballeroeg@si.edu  
+# ----------------Modules------------------------- #                                                              
+module load bio/faststructure/1.0                                                                                 
+#                                                                                                               
+# ----------------Your Commands------------------- #                                                              
+#                                                                                                                 
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+
+echo + NSLOTS = $NSLOTS                                                                                                    
+structure.py -K $SGE_TASK_ID
+--input=/scratch/genomics/caballeroeg/FasSTRUCTURE/population
+--output=/scratch/genomics/caballeroeg/FasSTRUCTURE/K 
+--prior=simple 
+--format=str 
+--full 
+--tol=10e-6 
+```
+
+
+We are interested in a the genomic structure from five sample sites. So, I ran k from one to ten (K 1-10), and compared the best fit for the data using the command `ChooseK.py` :
+
+```
+# ----------------Parameters---------------------- #                                                              
+#$ -S /bin/sh                                                                                                     
+#$ -pe mthread 30                                                                             
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem 
+#$ -cwd                                                                                                           
+#$ -j y                                                                                                           
+#$ -N best                                                              
+#$ -o best_k.log  
+#$ -m bea                                                                                                         
+#$ -M caballeroeg@si.edu
+# 
+# ----------------Modules------------------------- #          
+module load bio/faststructure/1.0
+#                                                                                                                 
+# ----------------Your Commands------------------- #                                                              
+#                                                                                                                          
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+echo + NSLOTS = $NSLOTS                                                                                           
+chooseK.py --input=/scratch/genomics/caballeroeg/FasSTRUCTURE/K_                                                  
+```
+
+Our output is :
+
+```
+Model complexity that maximizes marginal likelihood = 1                                                                    
+Model components used to explain structure in data = 1 
+
+```
+
+
+ We can also plot the results using the following command:
+ 
+```
+# ----------------Parameters---------------------- #                                                              
+#$ -S /bin/sh                                                                                                     
+#$ -pe mthread 30                                                                             
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem 
+#$ -cwd                                                                                                           
+#$ -j y                                                                                                           
+#$ -N best                                                              
+#$ -o best_k.log  
+#$ -m bea                                                                                                         
+#$ -M caballeroeg@si.edu
+# 
+# ----------------Modules------------------------- #          
+module load bio/faststructure/1.0
+#                                                                                                                 
+# ----------------Your Commands------------------- #   
+
+#                                                                                                                          
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+echo + NSLOTS = $NSLOTS  
+
+distruct.py \          
+-K $SGE_TASK_ID \                                                                                                 
+--input=/scratch/genomics/caballeroeg/FasSTRUCTURE/k$SGE_TASK_ID/K_$SGE_TASK_ID \                                 
+--output=/scratch/genomics/caballeroeg/FasSTRUCTURE/K$SGE_TASK_ID \                                               
+--popfile=/scratch/genomics/caballeroeg/FasSTRUCTURE/popfile.txt                                                  
+--title=K-means $SGE_TASK_ID  
+```
+

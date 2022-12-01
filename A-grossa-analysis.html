@@ -1611,6 +1611,351 @@ optimization</code></pre>
 ## 7 7                         10000            -173
 ## 8 8                          9869            -131
 ## 9 9                          9760            -109</code></pre>
+<p>To choose the best <em>denovo</em> parameter, we will have to
+calculate the difference of loci identified for each parameter
+combination. For instance, to calculate the difference of loci
+identified for <code>-M=2</code>, we have to substract to
+<code>-M=2</code> the loci identified in <code>-M=1</code>. The positive
+number closest to zero is considered the best parameter fit.</p>
+<pre><code>## Warning: NAs introducidos por coerción</code></pre>
+<pre><code>## [1] &quot;numeric&quot;</code></pre>
+<pre><code>## Warning: Use of `optimization$M` is discouraged. Use `M` instead.</code></pre>
+<pre><code>## Warning: Use of `optimization$M` is discouraged. Use `M` instead.</code></pre>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<pre><code>## Warning: Removed 1 row(s) containing missing values (geom_path).</code></pre>
+<p><img src="data:image/png;base64,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" /><!-- -->
+<code>M1</code> is not in the plot because it is unlikely possible that
+all loci are independent, and the plots starts from <code>M2</code>.</p>
+</div>
+<div id="executing-denovo_map.pl" class="section level3">
+<h3>Executing <code>denovo_map.pl</code></h3>
+<p>After setting the best fit we can run properly
+<code>denovo_map.pl</code> following the next protocol:</p>
+<pre><code># /bin/sh                                                                                                         
+# ----------------Parameters---------------------- #          
+#$  -S /bin/sh                                                                             
+#$ -pe mthread 30           
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem       
+#$ -cwd                                                                                                           
+#$ -j y                                                                                                           
+#$ -N m3p                       
+#$ -o m3p.log                                                                                                     
+#$ -m bea                 
+#$ -M caballeroeg@si.edu
+#                                                                                                                 
+# ----------------Modules------------------------- #                                                              
+module load ~/modulefiles/miniconda                                                                               
+source activate ste
+#                                                                                                           
+# ----------------Your Commands------------------- #     
+#                                                                                                                          
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                     
+echo + NSLOTS = $NSLOTS 
+
+denovo_map.pl -m 3 -M 3 -N 3 
+--samples /scratch/genomics/caballeroeg/CPrads/clean_rads/   #Directorio donde están los archivos stacks
+--popmap /scratch/genomics/caballer oeg/CPrads/clean_rads/popmp_1.txt  ##population map indicando el individuo y la población
+-o /scratch/genomics/caballeroeg/CPrads/clean_rads/edgar_analysis/m3p/  #Directorio para guardar 
+--paired  #Para nuestras lecturas de pares
+
+#                                                                                                                          
+echo = `date` job $JOB_NAME done  </code></pre>
+<p>In this case, our popmap file follows the next format :</p>
+<pre><code>1s01F&lt;tab&gt;1
+1s01M&lt;tab&gt;1
+1s02&lt;tab&gt;1
+...
+
+Speciyfing the population of individuals </code></pre>
+<p>We can check the number of loci identified using the next
+command:</p>
+<pre><code>cat gstacks.log | grep -B 2 -A 3 &#39;^Genotyped&#39;</code></pre>
+<p>wchich prints the number of loci generated:</p>
+<pre><code>Genotyped 93683 loci:
+  effective per-sample coverage: mean=49.4x, stdev=28.4x, min=4.5x, max=188.2x                                             
+  mean number of sites per locus: 465.0                                                                                    
+   a consistent phasing was found for 756770 of out 999308 (75.7%) diploid loci needing phasing    </code></pre>
+<p>We can also check for individuals with low mean coverage (&lt;10x)
+and discard them for our further analysis:</p>
+<pre><code> stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample \
+ | grep -v &#39;^#&#39; \
+ | cut -f 1-2,4-5,8
+
+# For mean_cov_ns, the coverage at each locus is weighted by the number of                                                 
+# samples present at that locus (i.e. coverage at shared loci counts more).                                                
+sample  n_loci  n_used_fw_reads mean_cov        mean_cov_ns                                                                
+1s01F   15217   600125  39.438  42.716                                                                                     
+1s01M   28001   3383027 120.818 167.263                                                                                    
+1s02    15521   568731  36.643  40.246                                                                                     
+1s03    17532   734543  41.897  48.854                                                                                     
+1s04    16607   1120518 67.473  75.308                                                                                     
+1s05    17848   796382  44.620  52.041                                                                                     
+1s06    17807   938246  52.690  60.962    </code></pre>
+<p>In the shell we can pass that information into a <code>.txt</code>
+file with the next command:</p>
+<pre><code>stacks-dist-extract gstacks.log.distribs effective_coverages_per_sample | grep -v &#39;^#&#39; | cut -f 1-2,4-5,8 &gt; raw_cov.txt</code></pre>
+<p>Then, we can edit the <code>raw_cov.txt</code>using different text
+editors as <a href="https://code.visualstudio.com">Visual Studio
+Code</a>, <a href="https://notepad-plus-plus.org/downloads/">Notepad++</a> o or
+others depending on your prefferences or your OS.I would not recommend
+use a note pad or microsoft word as editors.</p>
+<p>En el editor de texto, abrimos el archivo :</p>
+<pre><code>sample|depth of|max  |reads  | %reads
+      |cov     |cov  |incorpo| incor
+------|--------|-----|-------|-----
+3Bx42 | 19.37  |278  |375366 |  77.0
+3S36  | 14.43  |256  |265521 |  73.3
+3S38H | 5.58   |118  |15367  |  38.5
+3S39M | 6.32   |181  |77588  |  68.1</code></pre>
+<p>We are interested in the second column. Those individuals with a
+depth of coverage below 10 (as 3s38H) will be discarded for upcoming
+analysis.</p>
+</div>
+<div id="populations-software" class="section level3">
+<h3>Populations software</h3>
+<p><a href="https://catchenlab.life.illinois.edu/stacks/comp/populations.php"><code>populations</code></a>
+command analyse individuals and calculates genomics statistics as FST,
+FIS, and export the results in formats as <a href="https://web.stanford.edu/group/pritchardlab/structure.html">STRUCTURE</a>,
+<a href="https://www.cog-genomics.org/plink/1.9/formats">plink</a>, <a href="https://www.cog-genomics.org/plink/1.9/formats">genepop</a> to
+mention some.</p>
+<pre><code># /bin/sh                                                                                                                  
+# ----------------Parameters---------------------- #                                                                       
+#$  -S /bin/sh                                                                                                             
+#$ -pe mthread 30                                                                                                          
+#$ -q mThM.q                                                                                                               
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem                                                                                  
+#$ -cwd                                                                                                                    
+#$ -j y                                                                                                                    
+#$ -N paired_populations                                                                                                   
+#$ -o paired_populations.log                                                                                               
+#$ -m bea                                                                                                                  
+#$ -M caballeroeg@si.edu                                                                                                   
+#                                                                                                                          
+# ----------------Modules------------------------- #                                                                       
+module load ~/modulefiles/miniconda                                                                                        
+source activate ste                                                                                                        
+#                                                                                                                          
+# ----------------Your Commands------------------- #                                                                       
+#                                                                                                                          
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+echo + NSLOTS = $NSLOTS                                                                                                    
+#                                                                                                                          
+populations -P /scratch/genomics/caballeroeg/CPrads/clean_rads/edgar_analysis/m3p 
+-M /scratch/genomics/caballeroeg/populations_ana/paired_populations/paired_popmap.txt 
+-O /scratch/genomics/caballeroeg/populations_ana/paired_populations 
+-p 3 
+-r 0.50 
+--fstats 
+--vcf 
+--genepop 
+--structure 
+--treemix 
+--hwe
+#                                                                                                                          
+echo = `date` job $JOB_NAME done</code></pre>
+<p>The jobfile is the way we ran the software, the parameter
+<code>-p</code> controls the minimun number of populations that a locus
+must be present to process and <code>-r</code> the indicates the minimum
+percentage of individuals that must contain a locus to process it.</p>
+<p>To see the results we run the following command:</p>
+<pre><code>Removed 78826 loci that did not pass sample/population constraints from 93683 loci.
+Kept 14857 loci, composed of 10149843 sites; 86404 of those sites were filtered, 412383 variant sites remained.            
+Number of loci with PE contig: 14857.00 (100.0%);                                                                          
+  Mean length of loci: 673.17bp (stderr 0.60);                                                                             
+Number of loci with SE/PE overlap: 14856.00 (100.0%);</code></pre>
+<p>In our case we have 14857.</p>
+</div>
+<div id="faststructure" class="section level2">
+<h2>Faststructure</h2>
+<p><a href="https://rajanil.github.io/fastStructure/">Faststructure</a>
+is an open source model based algorithm to study populations genetics.
+It is based on the <a href="http://bioinformatica.uab.es/base/base3.asp?sitio=geneticapoblaciones&amp;anar=concep&amp;item=Hardy-Weinberg">Hardy-Weinberg
+equlibrium</a>.</p>
+<div id="executing-the-populations-for-faststructure-usage" class="section level3">
+<h3>Executing the populations for FastStructure usage</h3>
+<p>Primero, we have to execute the populatons command</p>
+<pre><code># /bin/sh                                                                                                        
+# ----------------Parameters---------------------- #                                                              
+#$  -S /bin/sh                                                                                                    
+#$ -pe mthread 30                                                                                                 
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem                                                                         
+#$ -cwd                                                                                                       
+#$ -j y                                                                                                        
+#$ -N random_snps_population                                                                                   
+#$ -o random_snps_population.log                                                                                  
+#$ -m bea                                                                                                         
+#$ -M caballeroeg@si.edu                                                                                        
+#                                                                                                                 
+# ----------------Modules------------------------- #                                                            
+module load ~/modulefiles/miniconda                                                                               
+source activate ste                                                                                               
+#                                                                                                                 
+# ----------------Your Commands------------------- #                                                            
+#                                                                                                              
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                   
+echo + NSLOTS = $NSLOTS                                                                                           
+#                                                                                                                 
+populations -P /scratch/genomics/caballeroeg/CPrads/clean_rads/edgar_analysis/m3p 
+-M /scratch/genomics/caballeroeg/populations_ana/paired_populations/paired_popmap.txt 
+-O /scratch/genomics/caballeroeg/populations_ana/random_snps_population 
+-p 3 -
+r 0.50 
+--fstats 
+--vcf 
+--genepop 
+--structure 
+--treemix 
+--hwe 
+--write-random-snp
+#                                                                                                                          
+echo = `date` job $JOB_NAME done   
+</code></pre>
+<p>As we see, the jobfile is exactly as the previous one but we
+habilitated the ouputs formars vcf,genepop,structure,treemix. Plus, the
+fstats calculates f-statistics, and the loci at Hardy-Wearding
+equlibrium. Furthermore, for this analysis we used the
+<code>write-random-snp</code>. For our abalysis, we are using the
+<code>structure</code></p>
+<p>Prior executing FastStructure we have to edit the file with <a href="https://www.r-project.org">R</a>, or <a href="https://www.microsoft.com/es-es/microsoft-365/excel">Microsft
+Excel</a>.</p>
+<pre class="r"><code>raw_pop &lt;- read.delim(&#39;Estructure_data.txt&#39;)
+raw_pop[1:8,1:8]</code></pre>
+<pre><code>##       X X.1 X1_115 X2_199 X4_491 X6_135 X9_107 X15_302
+## 1 1s01F   1      2      2     -9      3      2       3
+## 2 1s01F   1      3      2     -9      3      2       3
+## 3 1s01M   1      3      2     -9      3      2      -9
+## 4 1s01M   1      3      2     -9      3      2      -9
+## 5  1s02   1      3      2      4      3      2      -9
+## 6  1s02   1      3      2      4      3      2      -9
+## 7  1s03   1      3      2     -9      3      2       3
+## 8  1s03   1      3      2     -9      3      2       3</code></pre>
+<p>The structure of the populations file is the following:</p>
+<ul>
+<li><p>Column 1: Sample ID.</p></li>
+<li><p>Column 2: Population.</p></li>
+<li><p>Column 3-n: “SNPs” data.</p></li>
+</ul>
+<p>We have to modify this dataset, given that columns 1-6 in
+fastStructure is metada and not ‘SNPS’ data. We can add four columns of
+‘#’ and substitue 0 with -9. Lastly, our final format is
+<strong>str</strong>.</p>
+<p>Our final file is:</p>
+<pre class="r"><code>modi &lt;- read.delim(&#39;structure_modified.txt&#39;)
+modi[1:8,1:12]</code></pre>
+<pre><code>##   X. X..1 X..2 X..3 X1s01F X1 X2 X2.1 X.9 X3 X2.2 X3.1
+## 1  #    #    #    #  1s01F  1  3    2  -9  3    2    3
+## 2  #    #    #    #  1s01M  1  3    2  -9  3    2   -9
+## 3  #    #    #    #  1s01M  1  3    2  -9  3    2   -9
+## 4  #    #    #    #   1s02  1  3    2   4  3    2   -9
+## 5  #    #    #    #   1s02  1  3    2   4  3    2   -9
+## 6  #    #    #    #   1s03  1  3    2  -9  3    2    3
+## 7  #    #    #    #   1s03  1  3    2  -9  3    2    3
+## 8  #    #    #    #   1s04  1  2    2   4  3    2   -9</code></pre>
+</div>
+<div id="executing-faststructure" class="section level3">
+<h3>Executing fastStructure</h3>
+<p>This is our <code>jobfile</code> :</p>
+<pre><code>Uage: python structure.py
+     -K &lt;int&gt;    number of populations assumed
+     --input=&lt;file&gt;   (/path/to/&#39;file.str/format/file) #without quotes
+     --output=&lt;file&gt;   (/path/to/output/file)
+     --tol=&lt;float&gt;   (divergence criterion; 10e-6 by default)
+     --prior={simple,logistic}   (by default: simple)
+     --cv=&lt;int&gt;   (number of cross validation, 0 implies no validation cross; by default: 0)
+     --format={bed,str} (input file format; bed, by default.&#39;str&#39; for our purpose)
+     --full   (deploy all the parameters variables; optional)
+     --seed=&lt;int&gt;   (specify manually random seed number, optional)
+</code></pre>
+<p>Took from <a href="https://vdreis.com/faststructure/">vdreis</a>,
+which describes how to transform the data for faststucture, and <a href="https://rajanil.github.io/fastStructure/">fastructure official
+website</a>.</p>
+<p>The <code>jobfile</code> is :</p>
+<pre><code># /bin/sh                                                                                                         
+# ----------------Parameters---------------------- #
+#$ -S /bin/sh                                                                                                   
+#$ -pe mthread 30                                                                                                 
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem                   
+#$ -cwd                                                                                                         
+#$ -j y                                                                                                           
+#$ -N k1                                                                                                          
+#$ -o K_$TASK_ID.log                                                                                              
+#$ -t 1-10                                                                                                        
+#$ -m bea                                                                                                
+#$ -M caballeroeg@si.edu  
+# ----------------Modules------------------------- #                                                              
+module load bio/faststructure/1.0                                                                                 
+#                                                                                                               
+# ----------------Your Commands------------------- #                                                              
+#                                                                                                                 
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+
+echo + NSLOTS = $NSLOTS                                                                                                    
+structure.py -K $SGE_TASK_ID
+--input=/scratch/genomics/caballeroeg/FasSTRUCTURE/population
+--output=/scratch/genomics/caballeroeg/FasSTRUCTURE/K 
+--prior=simple 
+--format=str 
+--full 
+--tol=10e-6 </code></pre>
+<p>We are interested in a the genomic structure from five sample sites.
+So, I ran k from one to ten (K 1-10), and compared the best fit for the
+data using the command <code>ChooseK.py</code> :</p>
+<pre><code># ----------------Parameters---------------------- #                                                              
+#$ -S /bin/sh                                                                                                     
+#$ -pe mthread 30                                                                             
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem 
+#$ -cwd                                                                                                           
+#$ -j y                                                                                                           
+#$ -N best                                                              
+#$ -o best_k.log  
+#$ -m bea                                                                                                         
+#$ -M caballeroeg@si.edu
+# 
+# ----------------Modules------------------------- #          
+module load bio/faststructure/1.0
+#                                                                                                                 
+# ----------------Your Commands------------------- #                                                              
+#                                                                                                                          
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+echo + NSLOTS = $NSLOTS                                                                                           
+chooseK.py --input=/scratch/genomics/caballeroeg/FasSTRUCTURE/K_                                                  </code></pre>
+<p>Our output is :</p>
+<pre><code>Model complexity that maximizes marginal likelihood = 1                                                                    
+Model components used to explain structure in data = 1 
+</code></pre>
+<p>We can also plot the results using the following command:</p>
+<pre><code># ----------------Parameters---------------------- #                                                              
+#$ -S /bin/sh                                                                                                     
+#$ -pe mthread 30                                                                             
+#$ -q mThM.q                                                                                                      
+#$ -l mres=240G,h_data=8G,h_vmem=8G,himem 
+#$ -cwd                                                                                                           
+#$ -j y                                                                                                           
+#$ -N best                                                              
+#$ -o best_k.log  
+#$ -m bea                                                                                                         
+#$ -M caballeroeg@si.edu
+# 
+# ----------------Modules------------------------- #          
+module load bio/faststructure/1.0
+#                                                                                                                 
+# ----------------Your Commands------------------- #   
+
+#                                                                                                                          
+echo + `date` job $JOB_NAME started in $QUEUE with jobID=$JOB_ID on $HOSTNAME                                              
+echo + NSLOTS = $NSLOTS  
+
+distruct.py \          
+-K $SGE_TASK_ID \                                                                                                 
+--input=/scratch/genomics/caballeroeg/FasSTRUCTURE/k$SGE_TASK_ID/K_$SGE_TASK_ID \                                 
+--output=/scratch/genomics/caballeroeg/FasSTRUCTURE/K$SGE_TASK_ID \                                               
+--popfile=/scratch/genomics/caballeroeg/FasSTRUCTURE/popfile.txt                                                  
+--title=K-means $SGE_TASK_ID  </code></pre>
+</div>
 </div>
 </div>
 
