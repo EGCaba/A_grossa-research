@@ -16,7 +16,7 @@ output:
 
 # Stacks on a cluster
 
-### ¿ What's Stacks ?
+###  What's Stacks ?
 
 Stacks is a bioinformatic software useful to analyze short sequence data such as Rad-seq for population genomic research. First, I will work with a dataset previously filtered, to build loci from short sequences, using the command `denovo_map.pl` in the cluster [Hydra](https://confluence.si.edu/display/HPC/High+Performance+Computing).
 
